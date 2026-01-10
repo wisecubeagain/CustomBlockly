@@ -2,6 +2,12 @@ import * as Blockly from 'blockly';
 import {javascriptGenerator} from 'blockly/javascript';
 // 导入 blocks 以注册所有默认积木
 import 'blockly/blocks';
+// 导入 SDK
+import './sdk.js';
+// 导入自定义积木定义
+import './custom-blocks.js';
+// 导入自定义代码生成器
+import './custom-generators.js';
 
 // 创建 Blockly 工作区
 const workspace = Blockly.inject('blocklyDiv', {
@@ -103,6 +109,41 @@ const workspace = Blockly.inject('blocklyDiv', {
         name: '函数',
         colour: '#9A5CA6',
         custom: 'PROCEDURE'
+      },
+      {
+        kind: 'category',
+        name: 'WebSocket',
+        colour: '#C8A2C8',
+        contents: [
+          {
+            kind: 'block',
+            type: 'ws_connect'
+          },
+          {
+            kind: 'block',
+            type: 'ws_connect_sse'
+          },
+          {
+            kind: 'block',
+            type: 'ws_send'
+          },
+          {
+            kind: 'block',
+            type: 'ws_measure_latency'
+          },
+          {
+            kind: 'block',
+            type: 'ws_get_status'
+          },
+          {
+            kind: 'block',
+            type: 'ws_disconnect'
+          },
+          {
+            kind: 'block',
+            type: 'ws_disconnect_sse'
+          }
+        ]
       }
     ]
   },
@@ -133,7 +174,14 @@ workspace.addChangeListener((event) => {
 
 // 生成代码函数
 window.generateCode = function() {
-  const code = javascriptGenerator.workspaceToCode(workspace);
+  // 生成代码时，如果是异步函数，需要包装在 async 函数中
+  let code = javascriptGenerator.workspaceToCode(workspace);
+  
+  // 如果代码中包含 await，则包装在 async 函数中
+  if (code.includes('await')) {
+    code = `(async function() {\n${code}})();`;
+  }
+  
   document.getElementById('generatedCode').textContent = code || '// 暂无代码生成';
 };
 

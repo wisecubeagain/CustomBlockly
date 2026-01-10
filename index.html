@@ -67,12 +67,22 @@
       padding: 20px;
       overflow-y: auto;
       border-left: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
     
     .code-panel h2 {
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       font-size: 18px;
       color: #333;
+    }
+    
+    .code-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
     }
     
     #generatedCode {
@@ -80,11 +90,53 @@
       padding: 15px;
       border-radius: 4px;
       font-family: 'Courier New', monospace;
-      font-size: 14px;
+      font-size: 12px;
       white-space: pre-wrap;
       word-wrap: break-word;
       border: 1px solid #ddd;
-      min-height: 200px;
+      flex: 1;
+      overflow-y: auto;
+    }
+    
+    .messages-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    
+    #messages {
+      background: white;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      border: 1px solid #ddd;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 200px;
+    }
+    
+    .message-item {
+      margin-bottom: 8px;
+      padding: 5px;
+      border-left: 3px solid #4a90e2;
+      padding-left: 10px;
+    }
+    
+    .message-item.echo {
+      border-left-color: #4a90e2;
+    }
+    
+    .message-item.sse {
+      border-left-color: #e67e22;
+    }
+    
+    .message-time {
+      color: #999;
+      font-size: 10px;
     }
   </style>
 </head>
@@ -100,12 +152,51 @@
   <div class="container">
     <div id="blocklyDiv"></div>
     <div class="code-panel">
-      <h2>生成的代码：</h2>
-      <pre id="generatedCode">拖拽左侧积木，然后点击"生成代码"按钮查看生成的 JavaScript 代码</pre>
+      <div class="code-section">
+        <h2>生成的代码：</h2>
+        <pre id="generatedCode">拖拽左侧积木，然后点击"生成代码"按钮查看生成的 JavaScript 代码</pre>
+      </div>
+      <div class="messages-section">
+        <h2>WebSocket 消息：</h2>
+        <div id="messages">等待连接...</div>
+      </div>
     </div>
   </div>
 
   <script type="module" src="main.js"></script>
+  <script>
+    // 在控制台输出 SDK 信息，方便调试
+    window.addEventListener('load', () => {
+      console.log('WebSocket SDK 已加载，可以通过 window.wsSDK 访问');
+      
+      // 注册消息处理器，在界面上显示消息
+      setTimeout(() => {
+        if (window.wsSDK) {
+          const messagesDiv = document.getElementById('messages');
+          
+          // Echo 消息处理器
+          window.wsSDK.onMessage((message) => {
+            const time = new Date().toLocaleTimeString();
+            const item = document.createElement('div');
+            item.className = 'message-item echo';
+            item.innerHTML = `<span class="message-time">[${time}] Echo:</span> ${message}`;
+            messagesDiv.appendChild(item);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+          });
+          
+          // SSE 消息处理器
+          window.wsSDK.onSSEMessage((message) => {
+            const time = new Date().toLocaleTimeString();
+            const item = document.createElement('div');
+            item.className = 'message-item sse';
+            item.innerHTML = `<span class="message-time">[${time}] SSE:</span> ${message}`;
+            messagesDiv.appendChild(item);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+          });
+        }
+      }, 1000);
+    });
+  </script>
 </body>
 </html>
 
