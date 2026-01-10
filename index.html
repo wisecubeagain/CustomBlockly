@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blockly Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header {
+      background: #4a90e2;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header h1 {
+      font-size: 20px;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+    }
+    
+    button {
+      padding: 8px 16px;
+      background: white;
+      color: #4a90e2;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    button:hover {
+      background: #f0f0f0;
+    }
+    
+    .container {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+    
+    #blocklyDiv {
+      flex: 1;
+      height: 100%;
+    }
+    
+    .code-panel {
+      width: 400px;
+      background: #f5f5f5;
+      padding: 20px;
+      overflow-y: auto;
+      border-left: 1px solid #ddd;
+    }
+    
+    .code-panel h2 {
+      margin-bottom: 15px;
+      font-size: 18px;
+      color: #333;
+    }
+    
+    #generatedCode {
+      background: white;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      border: 1px solid #ddd;
+      min-height: 200px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🚀 Blockly 测试 Demo</h1>
+    <div class="controls">
+      <button onclick="generateCode()">生成代码</button>
+      <button onclick="clearWorkspace()">清空</button>
+    </div>
+  </div>
+  
+  <div class="container">
+    <div id="blocklyDiv"></div>
+    <div class="code-panel">
+      <h2>生成的代码：</h2>
+      <pre id="generatedCode">拖拽左侧积木，然后点击"生成代码"按钮查看生成的 JavaScript 代码</pre>
+    </div>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
+
