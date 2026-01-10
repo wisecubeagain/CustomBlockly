@@ -27,6 +27,9 @@ build/
 *.min.js
 *.min.css
 
+# Vite
+.vite/
+
 # Environment
 .env
 .env.local

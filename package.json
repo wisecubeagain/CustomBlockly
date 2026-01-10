@@ -4,13 +4,15 @@
   "description": "简单的 Blockly 测试 Demo",
   "type": "module",
   "scripts": {
-    "start": "npx http-server . -p 8080 -o",
-    "dev": "npx http-server . -p 8080 -o"
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "blockly": "^12.3.1"
   },
   "devDependencies": {
-    "http-server": "^14.1.1"
+    "vite": "^5.0.0"
   }
 }
