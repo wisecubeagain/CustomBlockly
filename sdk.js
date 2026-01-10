@@ -14,8 +14,9 @@ class WebSocketSDK {
   /**
    * 连接 WebSocket 服务器（Echo 模式）
    * @param {string} url - WebSocket 服务器地址，默认为 echo 服务器
+   * @param {Function} onConnected - 连接成功后的回调函数
    */
-  connect(url = 'wss://echo.websocket.org') {
+  connect(url = 'wss://echo.websocket.org', onConnected = null) {
     return new Promise((resolve, reject) => {
       try {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
@@ -28,7 +29,18 @@ class WebSocketSDK {
         this.ws.onopen = () => {
           this.connected = true;
           console.log('WebSocket 连接成功:', url);
-          resolve({ success: true, message: '连接成功' });
+          const result = { success: true, message: '连接成功' };
+          
+          // 如果有回调函数，执行回调
+          if (onConnected && typeof onConnected === 'function') {
+            try {
+              onConnected(result);
+            } catch (error) {
+              console.error('连接回调函数执行错误:', error);
+            }
+          }
+          
+          resolve(result);
         };
 
         this.ws.onmessage = (event) => {
@@ -122,6 +134,52 @@ class WebSocketSDK {
     this.ws.send(message);
     console.log('发送消息:', message);
     return { success: true, message: '消息已发送' };
+  }
+
+  /**
+   * 发送消息并等待回复
+   * @param {string} message - 要发送的消息
+   * @param {number} timeout - 超时时间（毫秒），默认 5 秒
+   * @returns {Promise<string>} 返回收到的回复消息
+   */
+  sendMessageAndWait(message, timeout = 5000) {
+    if (!this.connected || !this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      throw new Error('WebSocket 未连接，请先调用 connect 方法');
+    }
+
+    return new Promise((resolve, reject) => {
+      // 临时消息处理器，用于接收回复
+      const handler = (receivedMessage) => {
+        // 移除临时处理器
+        const index = this.messageHandlers.indexOf(handler);
+        if (index > -1) {
+          this.messageHandlers.splice(index, 1);
+        }
+        
+        // 清除超时定时器
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        
+        resolve(receivedMessage);
+      };
+
+      // 添加临时处理器
+      this.messageHandlers.push(handler);
+      
+      // 发送消息
+      this.ws.send(message);
+      console.log('发送消息并等待回复:', message);
+      
+      // 设置超时
+      const timeoutId = setTimeout(() => {
+        const index = this.messageHandlers.indexOf(handler);
+        if (index > -1) {
+          this.messageHandlers.splice(index, 1);
+          reject(new Error(`等待回复超时 (${timeout}ms)`));
+        }
+      }, timeout);
+    });
   }
 
   /**
@@ -238,6 +296,37 @@ class WebSocketSDK {
       echoReadyState: this.ws ? this.ws.readyState : WebSocket.CLOSED,
       sseReadyState: this.wsSSE ? this.wsSSE.readyState : WebSocket.CLOSED
     };
+  }
+
+  /**
+   * 睡眠指定时间
+   * @param {number} ms - 睡眠时间（毫秒）
+   * @returns {Promise<void>}
+   */
+  async sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * 打印数据（支持多种类型）
+   * @param {*} data - 要打印的数据
+   */
+  print(data) {
+    let output = '';
+    if (typeof data === 'object' && data !== null) {
+      output = JSON.stringify(data, null, 2);
+    } else {
+      output = String(data);
+    }
+    
+    console.log('打印:', output);
+    
+    // 触发打印事件，让界面可以显示
+    if (window.onPrint) {
+      window.onPrint(output);
+    }
+    
+    return output;
   }
 }
 

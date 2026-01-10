@@ -62,7 +62,7 @@
     }
     
     .code-panel {
-      width: 400px;
+      width: 450px;
       background: #f5f5f5;
       padding: 20px;
       overflow-y: auto;
@@ -96,6 +96,39 @@
       border: 1px solid #ddd;
       flex: 1;
       overflow-y: auto;
+    }
+    
+    .output-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    
+    #output {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      border: 1px solid #ddd;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 150px;
+      min-height: 80px;
+    }
+    
+    #output.error {
+      background: #2d1b1b;
+      color: #f48771;
+    }
+    
+    #output.success {
+      background: #1b2d1b;
+      color: #89d185;
     }
     
     .messages-section {
@@ -145,6 +178,7 @@
     <h1>🚀 Blockly 测试 Demo</h1>
     <div class="controls">
       <button onclick="generateCode()">生成代码</button>
+      <button onclick="runCode()" style="background: #27ae60; color: white;">▶ 运行</button>
       <button onclick="clearWorkspace()">清空</button>
     </div>
   </div>
@@ -155,6 +189,10 @@
       <div class="code-section">
         <h2>生成的代码：</h2>
         <pre id="generatedCode">拖拽左侧积木，然后点击"生成代码"按钮查看生成的 JavaScript 代码</pre>
+      </div>
+      <div class="output-section">
+        <h2>运行输出：</h2>
+        <pre id="output">点击"运行"按钮执行代码，输出将显示在这里...</pre>
       </div>
       <div class="messages-section">
         <h2>WebSocket 消息：</h2>
@@ -168,6 +206,15 @@
     // 在控制台输出 SDK 信息，方便调试
     window.addEventListener('load', () => {
       console.log('WebSocket SDK 已加载，可以通过 window.wsSDK 访问');
+      
+      // 注册 print 输出处理器
+      window.onPrint = function(data) {
+        const outputDiv = document.getElementById('output');
+        const currentText = outputDiv.textContent;
+        const newText = currentText + (currentText ? '\n' : '') + '[PRINT] ' + data;
+        outputDiv.textContent = newText;
+        outputDiv.scrollTop = outputDiv.scrollHeight;
+      };
       
       // 注册消息处理器，在界面上显示消息
       setTimeout(() => {
